@@ -1,8 +1,11 @@
 # Análisis de Sentimiento de Reseñas de Anime
 
 **Integrantes:** Diego Silva Madariaga / Bastián Cortez Arce
+
 **Profesor:** Jaime Andrés Jiménez / Procesamiento de lenguaje natural
+
 **Institución:** UTEM (Universidad Tecnológica Metropolitana)
+
 **Periodo:** Primer Semestre 2026
 
 
