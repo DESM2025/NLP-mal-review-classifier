@@ -1,0 +1,27 @@
+{
+  "dataset": "D:\\U\\nlp\\Analisis de sentimiento Anime list\\data\\anime_sentiment_balanceado.csv",
+  "text_column": "texto_resena",
+  "label_column": "sentimiento",
+  "pretrained_model": "distilbert-base-uncased",
+  "max_len": 192,
+  "lstm_hidden": 256,
+  "lstm_layers": 1,
+  "dropout": 0.3,
+  "batch_size": 8,
+  "epochs_frozen": 5,
+  "epochs_unfrozen": 2,
+  "lr_head": 0.001,
+  "lr_full": 2e-05,
+  "weight_decay": 0.01,
+  "grad_clip": 1.0,
+  "seed": 42,
+  "sizes": {
+    "train": 10736,
+    "val": 1193,
+    "test": 2983
+  },
+  "test": {
+    "loss": 0.36796799168738487,
+    "accuracy": 0.8957425410660409
+  }
+}
