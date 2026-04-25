@@ -82,4 +82,4 @@ python entrenar_distilbert_bilstm.py
 
 streamlit run src/app.py
 
-## Hardware: Entrenamiento acelerado por hardware mediante CUDA en una GPU NVIDIA RTX 4060/16 GB RAM/Ryzen 5700x.
+### Hardware: Entrenamiento acelerado por hardware mediante CUDA en una GPU NVIDIA RTX 4060/16 GB RAM/Ryzen 5700x.
