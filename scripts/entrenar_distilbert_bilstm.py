@@ -160,6 +160,25 @@ def resolver_ruta_desde_root(path: Path) -> Path:
     return (PROJECT_ROOT / path).resolve()
 
 
+def ruta_portable(valor: str | Path) -> str:
+    """Devuelve la ruta relativa a PROJECT_ROOT (con /) si esta dentro; si no, la deja como esta.
+
+    Sirve para serializar paths en el config y checkpoint de forma portable
+    entre equipos (no quedan rutas tipo D:\\... hardcodeadas).
+    Las cadenas que no son rutas locales (p.ej. "distilbert-base-uncased") se
+    devuelven tal cual.
+    """
+    s = str(valor)
+    p = Path(s)
+    try:
+        if p.is_absolute():
+            rel = p.resolve().relative_to(PROJECT_ROOT.resolve())
+            return rel.as_posix()
+    except ValueError:
+        pass
+    return s
+
+
 # =========================================================================== #
 # Datos                                                                       #
 # =========================================================================== #
@@ -433,7 +452,7 @@ def guardar_checkpoint(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "pretrained_model_name": args.pretrained_model,
+        "pretrained_model_name": ruta_portable(args.pretrained_model),
         "max_len": args.max_len,
         "lstm_hidden_size": args.lstm_hidden,
         "lstm_num_layers": args.lstm_layers,
@@ -452,10 +471,10 @@ def guardar_configuracion(
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "dataset": str(args.dataset),
+        "dataset": ruta_portable(args.dataset),
         "text_column": args.text_column,
         "label_column": args.label_column,
-        "pretrained_model": args.pretrained_model,
+        "pretrained_model": ruta_portable(args.pretrained_model),
         "max_len": args.max_len,
         "lstm_hidden": args.lstm_hidden,
         "lstm_layers": args.lstm_layers,

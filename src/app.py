@@ -103,6 +103,16 @@ def cargar_modelo_y_tokenizer() -> tuple[DistilBertBiLSTMClassifier, AutoTokeniz
     checkpoint = torch.load(MODEL_PATH, map_location="cpu")
 
     pretrained_name = checkpoint.get("pretrained_model_name", "distilbert-base-uncased")
+    # Si es una ruta relativa, resolverla contra la raiz del proyecto
+    posible_ruta = Path(pretrained_name)
+    if not posible_ruta.is_absolute():
+        posible_ruta = PROJECT_ROOT / pretrained_name
+    if posible_ruta.exists() and posible_ruta.is_dir():
+        pretrained_name = str(posible_ruta)
+    elif ("/" in pretrained_name) or ("\\" in pretrained_name):
+        # Era una ruta local pero no existe: caer al base de HF
+        # (los pesos finales vendran del checkpoint via load_state_dict)
+        pretrained_name = "distilbert-base-uncased"
     max_len = int(checkpoint.get("max_len", DEFAULT_MAX_LEN))
 
     tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_DIR)
@@ -149,6 +159,73 @@ def inferir_probabilidad_positiva(
             prob = torch.sigmoid(logits).item()
 
     return float(np.clip(prob, 0.0, 1.0))
+
+
+def inferir_probabilidad_sliding(
+    texto: str,
+    model: DistilBertBiLSTMClassifier,
+    tokenizer: AutoTokenizer,
+    max_len: int,
+    stride: int = 64,
+) -> tuple[float, int]:
+    """
+    Inferencia por ventana deslizante para reseñas mas largas que max_len.
+
+    Tokeniza el texto completo, lo divide en chunks de max_len con solape de
+    `stride` tokens y promedia las probabilidades. Para reseñas que caben en
+    una sola ventana, se comporta igual que la inferencia normal.
+
+    Devuelve (probabilidad_promedio, n_chunks_usados).
+    """
+    device = next(model.parameters()).device
+    cls_id = tokenizer.cls_token_id
+    sep_id = tokenizer.sep_token_id
+    pad_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else 0
+
+    # Tokenizar sin truncar y sin tokens especiales para controlarlos manualmente
+    ids_completos = tokenizer.encode(
+        texto, add_special_tokens=False, truncation=False
+    )
+    ventana = max_len - 2  # reservamos espacio para [CLS] y [SEP]
+    if ventana <= 0:
+        return inferir_probabilidad_positiva(texto, model, tokenizer, max_len), 1
+
+    # Construir chunks con stride
+    chunks: list[list[int]] = []
+    if len(ids_completos) <= ventana:
+        chunks.append(ids_completos)
+    else:
+        paso = max(1, ventana - stride)
+        i = 0
+        while i < len(ids_completos):
+            chunk = ids_completos[i : i + ventana]
+            chunks.append(chunk)
+            if i + ventana >= len(ids_completos):
+                break
+            i += paso
+
+    probabilidades: list[float] = []
+    amp_context = (
+        torch.autocast(device_type="cuda", dtype=torch.float16)
+        if device.type == "cuda"
+        else nullcontext()
+    )
+    with torch.no_grad(), amp_context:
+        for chunk in chunks:
+            ids = [cls_id] + chunk + [sep_id]
+            attn = [1] * len(ids)
+            # Padding a max_len
+            faltante = max_len - len(ids)
+            if faltante > 0:
+                ids = ids + [pad_id] * faltante
+                attn = attn + [0] * faltante
+            input_ids = torch.tensor([ids], dtype=torch.long, device=device)
+            attention_mask = torch.tensor([attn], dtype=torch.long, device=device)
+            logits = model(input_ids=input_ids, attention_mask=attention_mask)
+            probabilidades.append(torch.sigmoid(logits).item())
+
+    prob_media = float(np.clip(np.mean(probabilidades), 0.0, 1.0))
+    return prob_media, len(chunks)
 
 
 def renderizar_resultado(
@@ -203,9 +280,18 @@ def main() -> None:
             st.error("El umbral negativo debe ser menor que el positivo.")
             return
 
+        usar_sliding = st.checkbox(
+            "Sliding window para reseñas largas",
+            value=True,
+            help=(
+                "Si la reseña excede el max_len del modelo, se divide en ventanas con "
+                "solape y se promedian las probabilidades."
+            ),
+        )
+
         if st.button("Recargar modelo/tokenizer", use_container_width=True):
             cargar_modelo_y_tokenizer.clear()
-            st.experimental_rerun()
+            st.rerun()
 
     st.title("Analizador de Sentimiento Anime")
     st.markdown(
@@ -245,14 +331,25 @@ def main() -> None:
         return
 
     with st.spinner("Analizando resena..."):
-        prob_positiva = inferir_probabilidad_positiva(
-            texto=texto_usuario,
-            model=modelo,
-            tokenizer=tokenizer,
-            max_len=max_len,
-        )
+        if usar_sliding:
+            prob_positiva, n_chunks = inferir_probabilidad_sliding(
+                texto=texto_usuario,
+                model=modelo,
+                tokenizer=tokenizer,
+                max_len=max_len,
+            )
+        else:
+            prob_positiva = inferir_probabilidad_positiva(
+                texto=texto_usuario,
+                model=modelo,
+                tokenizer=tokenizer,
+                max_len=max_len,
+            )
+            n_chunks = 1
 
     st.subheader("Resultado")
+    if n_chunks > 1:
+        st.caption(f"Reseña larga: se procesaron {n_chunks} ventanas de {max_len} tokens.")
     renderizar_resultado(
         prob_positiva=prob_positiva,
         umbral_negativo=float(umbral_negativo),

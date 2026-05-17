@@ -18,7 +18,14 @@ models/*.pth
 models/*.bin
 models/*.ckpt
 models/*.joblib
+models/*.safetensors
+models/**/*.pt
+models/**/*.pth
+models/**/*.bin
+models/**/*.safetensors
 models/distilbert_tokenizer/
+models/distilbert_anime_pretrained/
+models/sweeps/
 
 .pytest_cache/
 .mypy_cache/

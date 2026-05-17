@@ -16,6 +16,7 @@ dependencies:
   - requests>=2.32
   - beautifulsoup4>=4.12
   - lxml>=5.2
+  - matplotlib>=3.8
   - pip
   - pip:
       - transformers>=4.40

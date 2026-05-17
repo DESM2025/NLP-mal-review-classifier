@@ -9,3 +9,4 @@ safetensors>=0.4.3
 requests>=2.32
 beautifulsoup4>=4.12
 lxml>=5.2
+matplotlib>=3.8

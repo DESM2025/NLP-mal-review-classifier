@@ -1,27 +1,100 @@
 {
-  "dataset": "D:\\U\\nlp\\Analisis de sentimiento Anime list\\data\\anime_sentiment_balanceado.csv",
+  "dataset": "data/anime_sentiment_balanceado.csv",
   "text_column": "texto_resena",
   "label_column": "sentimiento",
-  "pretrained_model": "distilbert-base-uncased",
-  "max_len": 192,
+  "pretrained_model": "models/distilbert_anime_pretrained",
+  "max_len": 320,
   "lstm_hidden": 256,
   "lstm_layers": 1,
   "dropout": 0.3,
   "batch_size": 8,
   "epochs_frozen": 5,
-  "epochs_unfrozen": 2,
+  "epochs_unfrozen": 8,
   "lr_head": 0.001,
   "lr_full": 2e-05,
   "weight_decay": 0.01,
   "grad_clip": 1.0,
+  "warmup_ratio": 0.1,
+  "layer_lr_decay": 0.9,
+  "early_stop_patience": 2,
   "seed": 42,
   "sizes": {
     "train": 10736,
     "val": 1193,
     "test": 2983
   },
+  "validation": {
+    "loss": 0.37292947655369063,
+    "accuracy": 0.9128248113998324,
+    "roc_auc": 0.9744401537890797,
+    "per_class": {
+      "negativa": {
+        "precision": 0.8819875776397516,
+        "recall": 0.9530201342281879,
+        "f1": 0.9161290322580645
+      },
+      "positiva": {
+        "precision": 0.9489981785063752,
+        "recall": 0.8726968174204355,
+        "f1": 0.9092495636998255
+      }
+    },
+    "weighted": {
+      "precision": 0.9155209629854132,
+      "recall": 0.9128248113998324,
+      "f1": 0.9126864147146707
+    },
+    "macro": {
+      "precision": 0.9154928780730633,
+      "recall": 0.9128584758243117,
+      "f1": 0.9126892979789449
+    },
+    "confusion_matrix": [
+      [
+        568,
+        28
+      ],
+      [
+        76,
+        521
+      ]
+    ]
+  },
   "test": {
-    "loss": 0.36796799168738487,
-    "accuracy": 0.8957425410660409
+    "loss": 0.22981375467903592,
+    "accuracy": 0.9182031511900771,
+    "roc_auc": 0.9741878437739935,
+    "per_class": {
+      "negativa": {
+        "precision": 0.9244897959183673,
+        "recall": 0.910857908847185,
+        "f1": 0.9176232275489534
+      },
+      "positiva": {
+        "precision": 0.9120951751487112,
+        "recall": 0.9255533199195171,
+        "f1": 0.918774966711052
+      }
+    },
+    "weighted": {
+      "precision": 0.9182945630764103,
+      "recall": 0.9182031511900771,
+      "f1": 0.9181989040795229
+    },
+    "macro": {
+      "precision": 0.9182924855335393,
+      "recall": 0.918205614383351,
+      "f1": 0.9181990971300027
+    },
+    "confusion_matrix": [
+      [
+        1359,
+        133
+      ],
+      [
+        111,
+        1380
+      ]
+    ]
   }
 }
