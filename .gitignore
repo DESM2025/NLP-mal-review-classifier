@@ -13,6 +13,9 @@ __pycache__/
 
 .vscode/
 
+# Secretos de Streamlit (API keys, etc.) - NUNCA commitear
+.streamlit/secrets.toml
+
 models/*.pt
 models/*.pth
 models/*.bin
