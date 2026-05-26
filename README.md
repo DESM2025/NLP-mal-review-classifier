@@ -9,6 +9,14 @@
 **Periodo:** Primer Semestre 2026
 
 
+## Recursos
+
+| Recurso | Enlace |
+|---|---|
+| Dataset (MyAnimeList reviews) | [Raiser1/anime-review-mal](https://huggingface.co/datasets/Raiser1/anime-review-mal) |
+| Modelo entrenado | [Raiser1/distilbert-bilstm-anime-sentiment](https://huggingface.co/Raiser1/distilbert-bilstm-anime-sentiment/tree/main) |
+| Notebook Colab | [Notebook_Reproducible.ipynb](https://colab.research.google.com/drive/1X_GJehVaLPK4e_7C6mbZ7PP0uhrqwg8Q?usp=sharing) |
+
 ## Descripción del Proyecto
 Este proyecto utiliza una arquitectura híbrida de Deep Learning (DistilBERT + BiLSTM) para clasificar reseñas de MyAnimeList como positivas o negativas.
 
@@ -27,12 +35,12 @@ ANALISIS DE SENTIMIENTO ANIME LIST/
 │   └── resenas_negativos_limpio.csv      # Dataset procesado clase minoritaria
 ├── models/
 │   ├── distilbert_tokenizer/             # Archivos del AutoTokenizer guardados
-│   ├── distilbert_anime_pretrained/      # (Opcional) DistilBERT con MLM en dominio anime
+│   ├── distilbert_anime_pretrained/      # DistilBERT con continued pretraining MLM en dominio anime
 │   ├── distilbert_bilstm_config.json     # Hiperparámetros + métricas extendidas del modelo
 │   ├── distilbert_bilstm_model.pt        # Pesos entrenados del modelo final
 │   ├── test_errors.csv                   # Top reseñas mal clasificadas (análisis de errores)
-│   ├── test_metrics.json                 # Métricas del análisis standalone (opcional)
-│   ├── confusion_matrix.png              # Heatmap de la matriz de confusión (si matplotlib)
+│   ├── test_metrics.json                 # Métricas del análisis standalone
+│   ├── confusion_matrix.png              # Heatmap de la matriz de confusión
 │   └── sweeps/                           # Resultados del barrido de hiperparámetros BiLSTM
 ├── scripts/
 │   ├── balanceo.py                       # Script para igualar clases positiva/negativa
@@ -46,6 +54,7 @@ ANALISIS DE SENTIMIENTO ANIME LIST/
 ├── src/
 │   ├── app.py                            # Interfaz web interactiva en Streamlit
 │   └── model_distilbert_lstm.py          # Clase de la arquitectura neuronal (PyTorch)
+├── Notebook_Reproducible.ipynb           # Pipeline completo reproducible en Google Colab
 ├── environment.yml                       # Entorno de Conda con dependencias
 ├── requirements.txt                      # Alternativa pip para dependencias
 └── README.md
