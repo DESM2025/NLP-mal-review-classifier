@@ -20,6 +20,7 @@ from src.model_distilbert_lstm import DistilBertBiLSTMClassifier
 MODEL_PATH = PROJECT_ROOT / "models" / "distilbert_bilstm_model.pt"
 TOKENIZER_DIR = PROJECT_ROOT / "models" / "distilbert_tokenizer"
 DEFAULT_MAX_LEN = 256
+HF_REPO_ID = "Raiser1/distilbert-bilstm-anime-sentiment"
 
 # Modelos del free tier de Gemini (Google AI Studio).
 # flash es el mejor balance; flash-lite tiene más cuota gratis; pro es el más capaz.
@@ -97,9 +98,24 @@ def configurar_pagina() -> None:
     )
 
 
+def _descargar_modelos_si_faltan() -> None:
+    """Descarga los archivos del modelo desde HF Hub si no existen localmente."""
+    if MODEL_PATH.exists() and TOKENIZER_DIR.exists():
+        return
+    from huggingface_hub import snapshot_download
+    models_dir = PROJECT_ROOT / "models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_download(
+        repo_id=HF_REPO_ID,
+        local_dir=str(models_dir),
+        ignore_patterns=["*.gitattributes", ".gitattributes", "*.md"],
+    )
+
+
 @st.cache_resource(show_spinner="Cargando modelo y tokenizer...")
 def cargar_modelo_y_tokenizer() -> tuple[DistilBertBiLSTMClassifier, AutoTokenizer, int]:
     """Carga y cachea el modelo PyTorch + tokenizer para inferencia eficiente."""
+    _descargar_modelos_si_faltan()
     if not MODEL_PATH.exists():
         raise FileNotFoundError(f"No se encontró el modelo en: {MODEL_PATH}")
     if not TOKENIZER_DIR.exists():
