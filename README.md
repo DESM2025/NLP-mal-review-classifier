@@ -92,16 +92,28 @@ python scripts/sweep_bilstm.py --hidden 128 256 384 --layers 1 2 --dropout 0.20 
 
 ## Instalación del entorno
 
-### Conda 
+### Conda
 
+```bash
 conda env create -f environment.yml
-conda activate anime_sentiment
+conda activate anime-sentiment
+```
 
-### venv + pip
+### venv + pip (Linux)
 
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### venv + pip (Windows)
+
+```bash
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
+```
 
 ## Ejecución
 
@@ -149,9 +161,11 @@ python scripts/sweep_bilstm.py --hidden 128 256 384 --layers 1 2 --dropout 0.20 
 
 ### Ejecutar la aplicación Streamlit
 
-```
+```bash
 streamlit run src/app.py
 ```
+
+La app descarga automáticamente los pesos del modelo desde Hugging Face Hub (`Raiser1/distilbert-bilstm-anime-sentiment`) la primera vez que se ejecuta. Requiere conexión a internet (~500 MB). Las ejecuciones posteriores usan los archivos locales en `models/`.
 
 La app incluye una opción de **sliding window** en la barra lateral, útil cuando la reseña excede el `max_len` del modelo.
 
